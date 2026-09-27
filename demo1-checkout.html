@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 1 — Checkout | Accessibility with AI</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --panel:#121a33;
+    --panel-2:#161f3d;
+    --ink:#eef1fb;
+    --muted:#9aa4c7;
+    --line:#293258;
+    --teal:#2fd6c8;
+    --purple:#8b6bf2;
+    --danger:#ff5d7a;
+    --good:#38d39f;
+    --focus:#ffd166;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 15% -10%, #1a2350 0%, var(--bg) 55%);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    min-height:100vh;
+  }
+  header.site{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;border-bottom:1px solid var(--line);
+    background:rgba(10,14,32,0.6);
+    position:sticky;top:0;z-index:5;
+    backdrop-filter:blur(6px);
+  }
+  .brand{font-weight:800;font-size:18px;letter-spacing:0.02em;}
+  .brand span{color:var(--teal);}
+  nav.top-actions{display:flex;align-items:center;gap:18px;}
+
+  /* ---- THE CART BUTTON (Demo defect #1) ---- */
+  button.icon-btn{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    width:44px;height:44px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    color:var(--ink);
+    position:relative;
+  }
+  button.icon-btn:hover{border-color:var(--teal);}
+  button.icon-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+  .cart-badge{
+    position:absolute;top:-6px;right:-6px;
+    background:var(--danger);color:#fff;
+    font-size:11px;font-weight:800;
+    border-radius:999px;min-width:18px;height:18px;
+    display:flex;align-items:center;justify-content:center;
+    padding:0 4px;
+  }
+  /* sr-only utility used only in the FIXED state */
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  main{max-width:960px;margin:0 auto;padding:40px 24px 100px;}
+  .eyebrow{color:var(--teal);font-weight:700;letter-spacing:0.08em;font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+  h1{font-size:30px;margin:0 0 6px;}
+  p.lead{color:var(--muted);margin:0 0 32px;}
+
+  .grid{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:start;}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+
+  .product-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px;
+  }
+  .product-img-wrap{
+    background:#0e1530;border-radius:12px;overflow:hidden;
+    aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--line);
+  }
+  .product-img-wrap svg{width:60%;height:60%;opacity:0.9;}
+  .product-title{font-weight:700;font-size:18px;margin:16px 0 4px;}
+  .product-price{color:var(--teal);font-weight:800;font-size:20px;}
+
+  form.checkout{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:24px;
+  }
+  form.checkout h2{margin:0 0 18px;font-size:18px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  .field input, .field select{
+    width:100%;padding:11px 12px;border-radius:8px;
+    border:1px solid var(--line);background:#0d1330;color:var(--ink);
+    font-size:14px;
+  }
+  .field input:focus-visible, .field select:focus-visible{
+    outline:3px solid var(--focus);outline-offset:1px;border-color:var(--focus);
+  }
+  button.primary{
+    width:100%;padding:13px;border-radius:10px;border:none;
+    background:linear-gradient(90deg,var(--teal),var(--purple));
+    color:#08101f;font-weight:800;font-size:15px;cursor:pointer;margin-top:6px;
+  }
+  button.primary:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+
+  /* ---- Presenter control panel ---- */
+  .rig{
+    position:fixed;bottom:14px;right:14px;
+    background:#0a0e1f;border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;
+    font-size:12px;color:var(--muted);
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    z-index:20;max-width:280px;
+  }
+  .rig strong{color:var(--ink);display:block;margin-bottom:6px;font-size:12px;}
+  .rig .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .rig button{
+    background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;
+  }
+  .rig button.active{border-color:var(--teal);color:var(--teal);}
+  .rig .state{margin-top:8px;font-weight:700;}
+  .state.broken{color:var(--danger);}
+  .state.fixed{color:var(--good);}
+  .rig.collapsed .body{display:none;}
+  .rig .toggle-vis{cursor:pointer;background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;padding:0;margin-top:6px;}
+
+  code.tag{
+    background:#0d1330;border:1px solid var(--line);border-radius:6px;
+    padding:1px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--purple);
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="brand">north<span>trail</span> outfitters</div>
+  <nav class="top-actions" aria-label="Account">
+    <!-- DEFECT #1: icon-only button, no accessible name in the BROKEN state -->
+    <button class="icon-btn" id="cartBtn" type="button">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </nav>
+</header>
+
+<main>
+  <div class="eyebrow">Checkout</div>
+  <h1>Trailrunner Low — Men's</h1>
+  <p class="lead">Demo 1: one page, two kinds of accessibility defect.</p>
+
+  <div class="grid">
+    <div class="product-card">
+      <div class="product-img-wrap">
+        <!-- DEFECT #2: alt text present, but meaningless -->
+        <svg id="shoeSvg" viewBox="0 0 200 120" width="70%" height="70%" aria-hidden="false" role="img" aria-label="image">
+          <ellipse cx="100" cy="95" rx="80" ry="10" fill="#0a0f24"/>
+          <path d="M20 80 C 30 50, 70 35, 110 40 C 150 44, 170 55, 178 78 C 178 88, 160 92, 130 90 C 90 88, 40 92, 20 80 Z" fill="#2fd6c8" opacity="0.9"/>
+          <path d="M40 75 C 60 55, 90 48, 120 52" stroke="#8b6bf2" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <circle cx="60" cy="66" r="3" fill="#0b1020"/>
+          <circle cx="75" cy="62" r="3" fill="#0b1020"/>
+          <circle cx="90" cy="60" r="3" fill="#0b1020"/>
+        </svg>
+      </div>
+      <div class="product-title">Trailrunner Low — Volt / Slate</div>
+      <div class="product-price">€129.00</div>
+    </div>
+
+    <form class="checkout" onsubmit="return false;">
+      <h2>Shipping details</h2>
+      <div class="field">
+        <label for="fullName">Name</label>
+        <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Jane Appleseed">
+      </div>
+      <div class="field">
+        <label for="country">Country</label>
+        <select id="country" name="country">
+          <option value="">Select a country</option>
+          <option>Netherlands</option>
+          <option>Belgium</option>
+          <option>Germany</option>
+          <option>Spain</option>
+        </select>
+      </div>
+      <button class="primary" type="submit">Continue</button>
+    </form>
+  </div>
+</main>
+
+<!-- Presenter rig: not part of the page under test, just lets you flip states live -->
+<div class="rig" id="rig">
+  <strong>Demo 1 control</strong>
+  <div class="body">
+    <div>Flip each defect independently, live, mid-talk.</div>
+    <div class="row">
+      <button id="btnCartToggle" type="button">Cart button: <code class="tag" id="cartState">no name</code></button>
+    </div>
+    <div class="row">
+      <button id="btnAltToggle" type="button">Alt text: <code class="tag" id="altState">"image"</code></button>
+    </div>
+    <div class="state broken" id="overallState">Rule engine will flag: cart button</div>
+  </div>
+  <button class="toggle-vis" id="rigCollapse" type="button">hide panel</button>
+</div>
+
+<script>
+  const cartBtn = document.getElementById('cartBtn');
+  const shoeSvg = document.getElementById('shoeSvg');
+  const btnCartToggle = document.getElementById('btnCartToggle');
+  const btnAltToggle = document.getElementById('btnAltToggle');
+  const cartState = document.getElementById('cartState');
+  const altState = document.getElementById('altState');
+  const overallState = document.getElementById('overallState');
+  const rig = document.getElementById('rig');
+  const rigCollapse = document.getElementById('rigCollapse');
+  const cartCount = document.getElementById('cartCount');
+
+  let cartFixed = false;
+  let altFixed = false;
+  let count = 0;
+
+  cartBtn.addEventListener('click', () => {
+    count += 1;
+    cartCount.textContent = count;
+  });
+
+  function renderCartState(){
+    // remove any previous accessible-name techniques first
+    cartBtn.removeAttribute('aria-label');
+    const existingSr = cartBtn.querySelector('.sr-only');
+    if (existingSr) existingSr.remove();
+
+    if (cartFixed){
+      const sr = document.createElement('span');
+      sr.className = 'sr-only';
+      sr.textContent = 'View cart, ' + count + ' items';
+      cartBtn.insertBefore(sr, cartBtn.firstChild);
+      cartState.textContent = 'accessible name ✓';
+    } else {
+      cartState.textContent = 'no name';
+    }
+    updateOverall();
+  }
+
+  function renderAltState(){
+    if (altFixed){
+      shoeSvg.setAttribute('aria-label', "Trailrunner Low trail-running shoe in volt green with slate grey sole, three-quarter side view");
+      altState.textContent = 'meaningful ✓';
+    } else {
+      shoeSvg.setAttribute('aria-label', 'image');
+      altState.textContent = '"image"';
+    }
+    updateOverall();
+  }
+
+  function updateOverall(){
+    if (!cartFixed && !altFixed){
+      overallState.textContent = 'Rule engine will flag: cart button';
+      overallState.className = 'state broken';
+    } else if (cartFixed && !altFixed){
+      overallState.textContent = '0 rule-engine violations — alt text still meaningless';
+      overallState.className = 'state broken';
+    } else if (!cartFixed && altFixed){
+      overallState.textContent = 'Rule engine still flags: cart button';
+      overallState.className = 'state broken';
+    } else {
+      overallState.textContent = 'Both fixed — property AND meaning';
+      overallState.className = 'state fixed';
+    }
+  }
+
+  btnCartToggle.addEventListener('click', () => { cartFixed = !cartFixed; renderCartState(); });
+  btnAltToggle.addEventListener('click', () => { altFixed = !altFixed; renderAltState(); });
+  rigCollapse.addEventListener('click', () => {
+    rig.classList.toggle('collapsed');
+    rigCollapse.textContent = rig.classList.contains('collapsed') ? 'show panel' : 'hide panel';
+  });
+
+  renderCartState();
+  renderAltState();
+</script>
+
+</body>
+</html>

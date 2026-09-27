@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 2 — Add to Basket | Accessibility with AI</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --panel:#121a33;
+    --panel-2:#161f3d;
+    --ink:#eef1fb;
+    --muted:#9aa4c7;
+    --line:#293258;
+    --teal:#2fd6c8;
+    --purple:#8b6bf2;
+    --danger:#ff5d7a;
+    --good:#38d39f;
+    --focus:#ffd166;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 85% -10%, #1a2350 0%, var(--bg) 55%);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    min-height:100vh;
+  }
+  header.site{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;border-bottom:1px solid var(--line);
+    background:rgba(10,14,32,0.6);
+    position:sticky;top:0;z-index:5;
+    backdrop-filter:blur(6px);
+  }
+  .brand{font-weight:800;font-size:18px;letter-spacing:0.02em;}
+  .brand span{color:var(--purple);}
+  .basket-pill{
+    display:flex;align-items:center;gap:8px;
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;
+  }
+  .basket-pill .n{color:var(--teal);}
+
+  main{max-width:920px;margin:0 auto;padding:40px 24px 100px;}
+  .eyebrow{color:var(--purple);font-weight:700;letter-spacing:0.08em;font-size:12px;text-transform:uppercase;margin-bottom:8px;}
+  h1{font-size:30px;margin:0 0 6px;}
+  p.lead{color:var(--muted);margin:0 0 32px;max-width:60ch;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}}
+
+  .product-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;
+  }
+  .product-img-wrap{
+    background:#0e1530;border-radius:12px;overflow:hidden;
+    aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--line);
+  }
+  .product-title{font-weight:700;font-size:18px;margin:16px 0 4px;}
+  .product-price{color:var(--purple);font-weight:800;font-size:20px;margin-bottom:18px;}
+
+  button.add{
+    padding:13px 18px;border-radius:10px;border:none;width:100%;
+    background:linear-gradient(90deg,var(--purple),var(--teal));
+    color:#08101f;font-weight:800;font-size:15px;cursor:pointer;
+  }
+  button.add:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+  button.add:active{transform:translateY(1px);}
+
+  .side{
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;
+  }
+  .side h2{margin:0 0 12px;font-size:16px;}
+  .checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .checks li{
+    display:flex;align-items:center;gap:10px;
+    background:#0d1330;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:none;}
+  .dot.pass{background:var(--good);}
+  .dot.warn{background:var(--focus);}
+  .checks .val{margin-left:auto;font-weight:700;}
+  .checks .val.pass{color:var(--good);}
+  .checks .val.silent{color:var(--danger);}
+
+  /* Visually-hidden live region: present in DOM always, only USED in fixed state */
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  .rig{
+    position:fixed;bottom:14px;right:14px;
+    background:#0a0e1f;border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;
+    font-size:12px;color:var(--muted);
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    z-index:20;max-width:290px;
+  }
+  .rig strong{color:var(--ink);display:block;margin-bottom:6px;font-size:12px;}
+  .rig .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .rig button{
+    background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;
+  }
+  .rig .state{margin-top:8px;font-weight:700;}
+  .state.broken{color:var(--danger);}
+  .state.fixed{color:var(--good);}
+  .rig.collapsed .body{display:none;}
+  .rig .toggle-vis{cursor:pointer;background:none;border:none;color:var(--muted);font-size:11px;text-decoration:underline;padding:0;margin-top:6px;}
+  code.tag{
+    background:#0d1330;border:1px solid var(--line);border-radius:6px;
+    padding:1px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--teal);
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="brand">north<span>trail</span> outfitters</div>
+  <div class="basket-pill">Basket: <span class="n" id="basketCount">0</span></div>
+</header>
+
+<main>
+  <div class="eyebrow">Product</div>
+  <h1>Ridgeline Shell Jacket</h1>
+  <p class="lead">Demo 2: everything passes. Click "Add to basket" — the counter updates, the functional test would go green, the automated scan finds nothing. Then turn on a screen reader and listen.</p>
+
+  <div class="grid">
+    <div class="product-card">
+      <div class="product-img-wrap">
+        <svg viewBox="0 0 200 140" width="65%" height="65%" aria-hidden="true">
+          <rect x="55" y="20" width="90" height="100" rx="18" fill="#8b6bf2" opacity="0.85"/>
+          <path d="M75 20 L75 50 L100 65 L125 50 L125 20" fill="none" stroke="#0b1020" stroke-width="4"/>
+          <rect x="90" y="70" width="20" height="45" rx="4" fill="#0b1020" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="product-title">Ridgeline Shell Jacket — Storm Grey</div>
+      <div class="product-price">€189.00</div>
+      <button class="add" id="addBtn" type="button">Add to basket</button>
+    </div>
+
+    <div class="side">
+      <h2>What your test suite sees</h2>
+      <ul class="checks">
+        <li><span class="dot pass"></span> Selenium: click handler fires <span class="val pass" id="checkSelenium">PASS</span></li>
+        <li><span class="dot pass"></span> A11y scan: automated rules <span class="val pass" id="checkScan">0 violations</span></li>
+        <li><span class="dot pass"></span> AI checks: labels, contrast, roles <span class="val pass" id="checkAI">no issues</span></li>
+        <li><span class="dot" id="dotUser"></span> Screen-reader user hears <span class="val silent" id="checkUser">NOT TESTED</span></li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<!-- The live region: exists always, only gets a message in the FIXED state -->
+<div id="liveRegion" class="sr-only" role="status" aria-live="polite"></div>
+
+<div class="rig" id="rig">
+  <strong>Demo 2 control</strong>
+  <div class="body">
+    <div>Click "Add to basket" on the page, then use your screen reader.</div>
+    <div class="row">
+      <button id="btnFixToggle" type="button">Live-region fix: <code class="tag" id="fixState">off</code></button>
+      <button id="btnReset" type="button">Reset basket</button>
+    </div>
+    <div class="state broken" id="overallState">Silent: no status message is announced</div>
+  </div>
+  <button class="toggle-vis" id="rigCollapse" type="button">hide panel</button>
+</div>
+
+<script>
+  const addBtn = document.getElementById('addBtn');
+  const basketCount = document.getElementById('basketCount');
+  const liveRegion = document.getElementById('liveRegion');
+  const btnFixToggle = document.getElementById('btnFixToggle');
+  const btnReset = document.getElementById('btnReset');
+  const fixState = document.getElementById('fixState');
+  const overallState = document.getElementById('overallState');
+  const checkUser = document.getElementById('checkUser');
+  const dotUser = document.getElementById('dotUser');
+  const rig = document.getElementById('rig');
+  const rigCollapse = document.getElementById('rigCollapse');
+
+  let count = 0;
+  let fixed = false;
+
+  addBtn.addEventListener('click', () => {
+    count += 1;
+    basketCount.textContent = count;
+
+    if (fixed){
+      // Announce to assistive tech via the polite live region
+      liveRegion.textContent = '';
+      // re-trigger for repeated identical announcements
+      window.setTimeout(() => {
+        liveRegion.textContent = 'Added to basket. Basket now has ' + count + (count === 1 ? ' item.' : ' items.');
+      }, 30);
+      checkUser.textContent = 'ANNOUNCED';
+      checkUser.className = 'val pass';
+      dotUser.className = 'dot pass';
+      overallState.textContent = 'Fixed: "Added to basket, ' + count + ' item(s)" is announced';
+      overallState.className = 'state fixed';
+    } else {
+      // BROKEN: DOM updates visually, nothing is announced
+      checkUser.textContent = 'NOT TESTED';
+      checkUser.className = 'val silent';
+      dotUser.className = 'dot';
+      overallState.textContent = 'Silent: no status message is announced';
+      overallState.className = 'state broken';
+    }
+  });
+
+  btnFixToggle.addEventListener('click', () => {
+    fixed = !fixed;
+    fixState.textContent = fixed ? 'on' : 'off';
+    liveRegion.textContent = '';
+  });
+
+  btnReset.addEventListener('click', () => {
+    count = 0;
+    basketCount.textContent = count;
+    liveRegion.textContent = '';
+    checkUser.textContent = 'NOT TESTED';
+    checkUser.className = 'val silent';
+    dotUser.className = 'dot';
+    overallState.textContent = fixed ? 'Reset — add an item to hear the fix' : 'Silent: no status message is announced';
+    overallState.className = 'state broken';
+  });
+
+  rigCollapse.addEventListener('click', () => {
+    rig.classList.toggle('collapsed');
+    rigCollapse.textContent = rig.classList.contains('collapsed') ? 'show panel' : 'hide panel';
+  });
+</script>
+
+</body>
+</html>
