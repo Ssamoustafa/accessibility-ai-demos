@@ -84,6 +84,7 @@
     border:1px solid var(--line);
   }
   .product-img-wrap svg{width:60%;height:60%;opacity:0.9;}
+  .product-img-wrap img{display:block;}
   .product-title{font-weight:700;font-size:18px;margin:16px 0 4px;}
   .product-price{color:var(--teal);font-weight:800;font-size:20px;}
 
@@ -164,15 +165,9 @@
   <div class="grid">
     <div class="product-card">
       <div class="product-img-wrap">
-        <!-- DEFECT #2: alt text present, but meaningless -->
-        <svg id="shoeSvg" viewBox="0 0 200 120" width="70%" height="70%" aria-hidden="false" role="img" aria-label="image">
-          <ellipse cx="100" cy="95" rx="80" ry="10" fill="#0a0f24"/>
-          <path d="M20 80 C 30 50, 70 35, 110 40 C 150 44, 170 55, 178 78 C 178 88, 160 92, 130 90 C 90 88, 40 92, 20 80 Z" fill="#2fd6c8" opacity="0.9"/>
-          <path d="M40 75 C 60 55, 90 48, 120 52" stroke="#8b6bf2" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <circle cx="60" cy="66" r="3" fill="#0b1020"/>
-          <circle cx="75" cy="62" r="3" fill="#0b1020"/>
-          <circle cx="90" cy="60" r="3" fill="#0b1020"/>
-        </svg>
+        <!-- DEFECT #2: a real <img> with alt text present, but meaningless. Scanners' AI-assisted
+             meaningful-alt-text checks look at <img alt="..."> specifically, not at SVG aria-label. -->
+        <img id="shoeImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAIAAAC6s0uzAAAO6UlEQVR4nO3dMa4bRxaGUVowHA2caQECHDlyPIm2MYEXYMDrMaAFOPA2lHgJjgbQJiYaTDABjacnimw22V39V9U9J5KfZKBBNuvjrW7yffP9259OAMCx3qQPAAAqEmAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgKOrdxw/pQ4DSvvn+7U/pYwCOcLe4n97/csyRACcBhlltHHDFGFoTYJhE0y1lPYbdCTAMKXsFV49h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gC7NH+AzGQagK1UCfCbDAHSiVoDPNBiAuIoBPhmFAUgrGuAzGQYgpXSAz2QYgOMJ8N80GIAjCfBnRmEADiPAl2QYgAMI8HUyDEBTArxEgwFoRIDvMAoD0IIAryLDAOxLgB8gwwDsRYAfpsEAbCfAzzAKA7DRN9+//Sl9DGN79/FD+hAABlZ2nhHgfcgwwHplo/uaAO9GgwEWiO4FAd6ZDAO8EN0FAtyEDANlie5KAtyQDANFiO4TBLgtDQZmJbobCfARZBiYg+juSICPI8PAiES3EQE+mgwD/RPdAwhwgAYDHRLdgwlwjAwDcaIbJMBhMgwcTHQ7IcBdkGGgKdHtkAD3QoOBfYlu5wS4LzIMbCG6AxHgHskwsJ7oDkqA+yXDwC2iOwEB7poGAy9EdzICPAAZhrJEd2ICPCHBhg5JKRcEGMGGx0gpuxBgHibYTENKCRJgmhNsDiClDEeA6Y5gFyelFCHADE+wuyWlsECAKUewnyClsDsBhjsmC7aUQicEGHZ2WLClFIYmwBD27uMHKYWCBBgAAt6kDwAAKhJgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAj4Nn0A0Lv//fc/6UMY1bff/SN9CNAvAWYwcjiQ458syWcgAkxzkslh9j3Z5JymBJi1dJRqnj7nlZs1BLguQYVGHn1xCXZNAjwbWYXhrH/ZSvVMBHgw+gqV3V0BFHogAtwXfQW2UOiBCHCAygIpC+uPNh9MgBsSWmAgt5YsYW5EgPehtcCsrq5vqrydAD9DboHivl4GJflRAryK4gIsu1gn9fguAb5JdAGe9noJFeOrBPgLoguwOzG+SoBPJ90FOMrLeqvEpQOsuwApSlw0wNIL0Inzglwww2/SBxCgvgC9KbgylwtwwecYYAjV1udyAQaAHggwAASUC3DB6/wAQ6i2PpcL8KnecwzQv4Irc9GPIZ2f6WoX/AE6VDC9Z0UDfPbyrCsxwMHKdvdF6QC/UGKAY+juCwH+wuszQ4wBdiG6VwnwTWIM8DTRvUuAV7k4k/QY4ILiPkqAn/H1eSbJQClyu50A7+PquajKwAS0thEBbujWWSvMQIeE9mACHLBwlmsz0JTK9kOA+3L3taHQwAJ9HYgAD0ahoTJ9nYkAz2b961OqoROyWpMA1/Xoa16wYSVBZQ0BZq2n1xTlZlA6SlMCTHP7rmJyzgLJZCACzGCOX2El/2lyCAsEGO5QEaCFN+kDAICKBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAACBBgAAgQYAAIEGAAC/g/8SUoUKvKdygAAAABJRU5ErkJggg==" alt="image" width="100%" style="width:100%;height:100%;object-fit:cover;">
       </div>
       <div class="product-title">Trailrunner Low — Volt / Slate</div>
       <div class="product-price">€129.00</div>
@@ -217,7 +212,7 @@
 
 <script>
   const cartBtn = document.getElementById('cartBtn');
-  const shoeSvg = document.getElementById('shoeSvg');
+  const shoeImg = document.getElementById('shoeImg');
   const btnCartToggle = document.getElementById('btnCartToggle');
   const btnAltToggle = document.getElementById('btnAltToggle');
   const cartState = document.getElementById('cartState');
@@ -256,10 +251,10 @@
 
   function renderAltState(){
     if (altFixed){
-      shoeSvg.setAttribute('aria-label', "Trailrunner Low trail-running shoe in volt green with slate grey sole, three-quarter side view");
+      shoeImg.setAttribute('alt', "Trailrunner Low trail-running shoe in volt green with slate grey sole, three-quarter side view");
       altState.textContent = 'meaningful ✓';
     } else {
-      shoeSvg.setAttribute('aria-label', 'image');
+      shoeImg.setAttribute('alt', 'image');
       altState.textContent = '"image"';
     }
     updateOverall();
