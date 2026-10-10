@@ -21,17 +21,19 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:radial-gradient(1200px 600px at 85% -10%, #1a2350 0%, var(--bg) 55%);
+    background:var(--bg);
     color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
     min-height:100vh;
   }
+  /* decorative glow lives on its own layer so the page itself has a solid background (stable scans) */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(1200px 600px at 85% -10%, #1a2350 0%, transparent 55%);}
   header.site{
     display:flex;align-items:center;justify-content:space-between;
     padding:18px 28px;border-bottom:1px solid var(--line);
-    background:rgba(10,14,32,0.6);
+    background:#0a0e20;
     position:sticky;top:0;z-index:5;
-    backdrop-filter:blur(6px);
   }
   .brand{font-weight:800;font-size:18px;letter-spacing:0.02em;}
   .brand span{color:var(--purple);}
@@ -59,11 +61,11 @@
     border:1px solid var(--line);
   }
   .product-title{font-weight:700;font-size:18px;margin:16px 0 4px;}
-  .product-price{color:var(--purple);font-weight:800;font-size:20px;margin-bottom:18px;}
+  .product-price{color:#a68cf5;font-weight:800;font-size:20px;margin-bottom:18px;} /* --purple on --panel was 4.49:1, fails AA */
 
   button.add{
     padding:13px 18px;border-radius:10px;border:none;width:100%;
-    background:linear-gradient(90deg,var(--purple),var(--teal));
+    background:var(--teal);
     color:#08101f;font-weight:800;font-size:15px;cursor:pointer;
   }
   button.add:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
@@ -106,6 +108,8 @@
     border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;
   }
   .rig .state{margin-top:8px;font-weight:700;}
+  .rig .hint{margin-top:8px;line-height:2.2;}
+  .rig .hint code.tag{display:inline-block;line-height:1.3;margin:0 2px;}
   .state.broken{color:var(--danger);}
   .state.fixed{color:var(--good);}
   .rig.collapsed .body{display:none;}
@@ -143,7 +147,7 @@
     </div>
 
     <div class="side">
-      <h2>What your test suite sees</h2>
+      <h2>What your test suite reports <span style="font-weight:400;color:var(--muted);font-size:12px;">(illustration — run the real scan live)</span></h2>
       <ul class="checks">
         <li><span class="dot pass"></span> Selenium: click handler fires <span class="val pass" id="checkSelenium">PASS</span></li>
         <li><span class="dot pass"></span> A11y scan: automated rules <span class="val pass" id="checkScan">0 violations</span></li>
@@ -155,9 +159,9 @@
 </main>
 
 <!-- The live region: exists always, only gets a message in the FIXED state -->
-<div id="liveRegion" class="sr-only" role="status" aria-live="polite"></div>
+<div id="liveRegion" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<div class="rig" id="rig">
+<aside class="rig" id="rig" aria-label="Presenter controls">
   <strong>Demo 2 control</strong>
   <div class="body">
     <div>Click "Add to basket" on the page, then use your screen reader.</div>
@@ -165,10 +169,11 @@
       <button id="btnFixToggle" type="button">Live-region fix: <code class="tag" id="fixState">off</code></button>
       <button id="btnReset" type="button">Reset basket</button>
     </div>
+    <div class="hint"><code class="tag">F</code> fix on/off · <code class="tag">R</code> reset · <code class="tag">A</code> add · <code class="tag">H</code> hide</div>
     <div class="state broken" id="overallState">Silent: no status message is announced</div>
   </div>
   <button class="toggle-vis" id="rigCollapse" type="button">hide panel</button>
-</div>
+</aside>
 
 <script>
   const addBtn = document.getElementById('addBtn');
@@ -216,6 +221,8 @@
     fixed = !fixed;
     fixState.textContent = fixed ? 'on' : 'off';
     liveRegion.textContent = '';
+    overallState.textContent = fixed ? 'Fix ON — the next add will be announced' : 'Silent: no status message is announced';
+    overallState.className = 'state ' + (fixed ? 'fixed' : 'broken');
   });
 
   btnReset.addEventListener('click', () => {
@@ -225,13 +232,23 @@
     checkUser.textContent = 'NOT TESTED';
     checkUser.className = 'val silent';
     dotUser.className = 'dot';
-    overallState.textContent = fixed ? 'Reset — add an item to hear the fix' : 'Silent: no status message is announced';
-    overallState.className = 'state broken';
+    overallState.textContent = fixed ? 'Fix ON — the next add will be announced' : 'Silent: no status message is announced';
+    overallState.className = 'state ' + (fixed ? 'fixed' : 'broken');
   });
 
   rigCollapse.addEventListener('click', () => {
     rig.classList.toggle('collapsed');
     rigCollapse.textContent = rig.classList.contains('collapsed') ? 'show panel' : 'hide panel';
+  });
+  // Presenter hotkeys: they do NOT move focus, so the screen-reader cursor stays on "Add to basket".
+  // (If VoiceOver Quick Nav is on, single letters are captured by VoiceOver — keep Quick Nav off.)
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k === 'f') btnFixToggle.click();
+    else if (k === 'r') btnReset.click();
+    else if (k === 'a') addBtn.click();
+    else if (k === 'h') rigCollapse.click();
   });
 </script>
 
