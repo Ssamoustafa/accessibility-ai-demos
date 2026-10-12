@@ -163,7 +163,7 @@
 
 <aside class="rig" id="rig" aria-label="Presenter controls">
   <strong>Demo 2 control</strong>
-  <div class="body">
+  <div class="body" id="rigBody">
     <div>Click "Add to basket" on the page, then use your screen reader.</div>
     <div class="row">
       <button id="btnFixToggle" type="button">Live-region fix: <code class="tag" id="fixState">off</code></button>
@@ -172,7 +172,7 @@
     <div class="hint"><code class="tag">F</code> fix on/off · <code class="tag">R</code> reset · <code class="tag">A</code> add · <code class="tag">H</code> hide</div>
     <div class="state broken" id="overallState">Silent: no status message is announced</div>
   </div>
-  <button class="toggle-vis" id="rigCollapse" type="button">hide panel</button>
+  <button class="toggle-vis" id="rigCollapse" type="button" aria-expanded="true" aria-controls="rigBody">hide panel</button>
 </aside>
 
 <script>
@@ -239,6 +239,7 @@
   rigCollapse.addEventListener('click', () => {
     rig.classList.toggle('collapsed');
     rigCollapse.textContent = rig.classList.contains('collapsed') ? 'show panel' : 'hide panel';
+    rigCollapse.setAttribute('aria-expanded', rig.classList.contains('collapsed') ? 'false' : 'true');
   });
   // Presenter hotkeys: they do NOT move focus, so the screen-reader cursor stays on "Add to basket".
   // (If VoiceOver Quick Nav is on, single letters are captured by VoiceOver — keep Quick Nav off.)

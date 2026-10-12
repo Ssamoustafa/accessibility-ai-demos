@@ -199,7 +199,7 @@
 <!-- Presenter rig: not part of the page under test, just lets you flip states live -->
 <aside class="rig" id="rig" aria-label="Presenter controls">
   <strong>Demo 1 control</strong>
-  <div class="body">
+  <div class="body" id="rigBody">
     <div>Flip each defect independently, live, mid-talk.</div>
     <div class="row">
       <button id="btnCartToggle" type="button">Cart button: <code class="tag" id="cartState">no name</code></button>
@@ -210,7 +210,7 @@
     <div class="hint">Keys: <code class="tag">1</code> cart · <code class="tag">2</code> alt · <code class="tag">R</code> reset · <code class="tag">H</code> hide</div>
     <div class="state broken" id="overallState">Rule engine will flag: cart button</div>
   </div>
-  <button class="toggle-vis" id="rigCollapse" type="button">hide panel</button>
+  <button class="toggle-vis" id="rigCollapse" type="button" aria-expanded="true" aria-controls="rigBody">hide panel</button>
 </aside>
 
 <script>
@@ -285,6 +285,7 @@
   rigCollapse.addEventListener('click', () => {
     rig.classList.toggle('collapsed');
     rigCollapse.textContent = rig.classList.contains('collapsed') ? 'show panel' : 'hide panel';
+    rigCollapse.setAttribute('aria-expanded', rig.classList.contains('collapsed') ? 'false' : 'true');
   });
 
   function resetAll(){
